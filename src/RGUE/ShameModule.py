@@ -4,27 +4,43 @@ from discord import Color
 import datetime
 
 
-async def process_command(message, db):
+async def process_command(context, message, db):
     embed = Embed()
-    if message.content.startswith("!shame"):
-        embed = shame(message, db)
 
-    if embed is None:
+    split = message.content.split()
+
+    if split[1] == "log":
+        embed = get_shame_logs(db)
+    else:
+        if message.content.startswith("!shame"):
+            embed = shame(message, db)
+
+    if embed is not None:
         await message.channel.send(embed=embed)
+
+
+def get_shame_logs(db):
+    logs = db.get_shame_logs()
+
+    embed = Embed(title="Shame Log", color=Color.green())
+
+    for log in logs:
+        embed.add_field(name=log[0], value=str(log[2] + "\n" + str(log[3])), inline=False)
+
+    return embed
 
 
 def shame(message, con):
     split = message.content.split()
-    target = split [1]
+    target = split[1]
     prefix = target[2]
     did = target[3:-1]
 
-    del split[0]
-    del split[0]
+    del split[0:2]
 
     reason = " ".join(split)
 
-    # if the person invoking the command is on mobile, the exclimation mark is left out in the id for users
+    # if the person invoking the command is on mobile, the exclamation mark is left out in the id for users
     if '0' <= prefix <= '9':
         prefix = '!'
         did = target[2:-1]
@@ -33,7 +49,7 @@ def shame(message, con):
         return shame_user(con, did, message, target, reason)
 
     elif prefix == '&':
-        return shame_role(con, did, target, message, reason)
+        return shame_role(con, did, message, reason)
 
 
 def shame_user(con, did, message, target, reason):
@@ -48,7 +64,7 @@ def shame_user(con, did, message, target, reason):
     return embed
 
 
-def shame_role(con, did, target, message, reason):
+def shame_role(con, did, message, reason):
     members = find_members_by_role(message, find_role(message, did))
 
     counters = []
@@ -60,10 +76,11 @@ def shame_role(con, did, target, message, reason):
 
     for counter in counters:
         desc += ("<@!" + str(counter.DiscordID)
-                + ">\nCount: " + str(counter.Count)
-                + "\nLast Shame: " + str(counter.Date) + "\n\n")
+                 + ">\nCount: " + str(counter.Count)
+                 + "\nLast Shame: " + str(counter.Date) + "\n\n")
         update_counter(con, counter)
-        con.add_shame_log(counter.UserName, ("No reason given." if len(reason) == 0 else reason), datetime.datetime.now())
+        con.add_shame_log(counter.UserName, ("No reason given." if len(reason) == 0 else reason),
+                          datetime.datetime.now())
 
     return Embed(title="Users shamed", description=desc, color=Color.green())
 
@@ -135,7 +152,7 @@ def find_members_by_role(message, role):
 
 
 class Counter:
-    def __init__(self, did, user, date, count, id = 0):
+    def __init__(self, did, user, date, count, id=0):
         self.id = id
         self.UserName = user
         self.DiscordID = did

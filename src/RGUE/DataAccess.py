@@ -44,7 +44,7 @@ class Connection():
 
         self.db.commit()
 
-    def get_shame_log(self):
+    def get_shame_logs(self):
         cursor = self.db.cursor()
 
         sql = "SELECT * FROM ShameLog"
