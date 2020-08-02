@@ -1,22 +1,20 @@
-import discord
-from RGUE import Commands
+from discord.ext import commands
 from RGUE import DataAccess
+from RGUE import ShameModule
 
 
-class Bot(discord.Client):
+class Bot(commands.Bot):
     def __init__(self, host, user, password, db, init):
-        super(Bot, self).__init__()
-        self.DB = DataAccess.Connection(host, user, password, db)
+        super(Bot, self).__init__(command_prefix="!")
+        DataAccess.Connection.initialize(host, user, password, db)
+        self.add_command(ShameModule.shame)
+        self.add_command(ShameModule.get_shame_logs)
 
         if init:
-            self.DB.create_databases()
+            DataAccess.Connection.get_instance().create_databases()
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
-
-    async def on_message(self, message):
-        if not message.author.bot and len(message.attachments) == 0 and message.content[0] == '!':
-            await Commands.process_command(self, message, self.DB)
 
 
 def main(key, host, user, password, bd, init=False):

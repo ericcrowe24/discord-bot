@@ -1,36 +1,32 @@
 from discord import Embed
 from discord import utils as dutils
 from discord import Color
+from RGUE.DataAccess import Connection
+from discord.ext import commands
 import datetime
 
 
-async def process_command(context, message, db):
-    embed = Embed()
-
-    split = message.content.split()
-
-    if split[1] == "log":
-        embed = get_shame_logs(db)
-    else:
-        if message.content.startswith("!shame"):
-            embed = shame(message, db)
+@commands.group(name="shame")
+async def shame(ctx):
+    embed = do_shame(ctx.message, Connection.get_instance())
 
     if embed is not None:
-        await message.channel.send(embed=embed)
+        await ctx.message.channel.send(embed=embed)
 
 
-def get_shame_logs(db):
-    logs = db.get_shame_logs()
+@shame.command(name="log")
+async def get_shame_logs(ctx):
+    logs = Connection.get_instance().get_shame_logs()
 
     embed = Embed(title="Shame Log", color=Color.green())
 
     for log in logs:
         embed.add_field(name=log[0], value=str(log[2] + "\n" + str(log[3])), inline=False)
 
-    return embed
+    await ctx.message.channel.send(embed=embed)
 
 
-def shame(message, con):
+def do_shame(message, con):
     split = message.content.split()
     target = split[1]
     prefix = target[2]
