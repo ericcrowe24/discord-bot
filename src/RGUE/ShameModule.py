@@ -126,7 +126,7 @@ def update_counter(con, counter):
 
 
 def add_counter(member, connection):
-    counter = Counter(member.id, member.name, datetime.datetime.now(), 0)
+    counter = Counter(member.id, member.name, datetime.datetime.now(), 1)
     connection.add_counter(counter)
     return counter
 

@@ -1,12 +1,15 @@
 import discord
-from src.RGUE import Commands
-from src.RGUE import DataAccess
+from RGUE import Commands
+from RGUE import DataAccess
 
 
 class Bot(discord.Client):
-    def __init__(self, host, user, password, db):
+    def __init__(self, host, user, password, db, init):
         super(Bot, self).__init__()
         self.DB = DataAccess.Connection(host, user, password, db)
+
+        if init:
+            self.DB.create_databases()
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
@@ -16,6 +19,6 @@ class Bot(discord.Client):
             await Commands.process_command(self, message, self.DB)
 
 
-def main(key, host, user, password, bd):
-    bot = Bot(host, user, password, bd)
+def main(key, host, user, password, bd, init=False):
+    bot = Bot(host, user, password, bd, init)
     bot.run(str(key))

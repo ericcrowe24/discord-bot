@@ -1,14 +1,35 @@
 import mysql.connector as mysql
 
 
-class Connection():
+class Connection:
     def __init__(self, host, user, password, db):
         self.db = mysql.connect(host=host, user=user, password=password, database=db)
 
-    def get_counter_by_discord_id(self, id):
+    def create_databases(self):
         cursor = self.db.cursor()
 
-        sql = "SELECT * FROM Counters WHERE DiscordID = " + str(id)
+        sql = "CREATE TABLE `Counters` (" \
+              "`ID` int(11) NOT NULL AUTO_INCREMENT," \
+              "`DiscordID` bigint(20) NOT NULL," \
+              "`DiscordUserName` TEXT NULL," \
+              "`Date` datetime NOT NULL," \
+              "`TimesCalled` int(11) NOT NULL," \
+              "PRIMARY KEY (`ID`)" \
+              ");" \
+              "CREATE TABLE `ShameLog`(" \
+              "`ID` INT(11) NOT NULL AUTO_INCREMENT," \
+              "`User` VARCHAR(50) NOT NULL," \
+              "`Message` VARCHAR(100) NOT NULL," \
+              "`Date` DATE NOT NULL," \
+              "PRIMARY KEY (`ID`);"
+
+        cursor.execute(sql)
+        pass
+
+    def get_counter_by_discord_id(self, did):
+        cursor = self.db.cursor()
+
+        sql = "SELECT * FROM Counters WHERE DiscordID = " + str(did)
         cursor.execute(sql)
 
         return cursor.fetchall()

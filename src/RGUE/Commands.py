@@ -1,4 +1,4 @@
-import src.RGUE.ShameModule as Shame
+import RGUE.ShameModule as Shame
 
 commands = {"shame": Shame.process_command}
 
