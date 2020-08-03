@@ -27,7 +27,7 @@ class ShameCog(commands.Cog):
         logs = db.get_shame_logs()
         db.close()
 
-        embed = Embed(title="Shame Log", color=Color.green())
+        embed = Embed(title="Shame Log", color=Color.light_grey())
 
         for log in logs:
             embed.add_field(name=log[1], value=str(log[2] + "\n" + str(log[3])), inline=False)
@@ -45,7 +45,7 @@ class ShameCog(commands.Cog):
         for counter in counters:
             desc += str(counter.UserName) + ": " + str(counter.Count) + "\n"
 
-        await ctx.message.channel.send(embed=Embed(title="Shame Scoreboard", description=desc))
+        await ctx.message.channel.send(embed=Embed(title="Shame Scoreboard", description=desc, colour=Color.blue()))
 
     def do_shame(self, message, con):
         split = message.content.split()
@@ -128,7 +128,7 @@ class ShameCog(commands.Cog):
                                  + str(target) + " was last shamed.\nTimes Shamed: "
                                  + str(counter.Count)
                                  + "\nReason: " + ("No reason given." if len(reason) == 0 else reason),
-                     color=Color.green())
+                     color=Color.red())
 
     def update_counter(self, con, counter):
         counter.Date = datetime.datetime.now()
