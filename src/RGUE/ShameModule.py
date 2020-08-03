@@ -8,7 +8,9 @@ import datetime
 
 @commands.group(name="shame")
 async def shame(ctx):
-    embed = do_shame(ctx.message, Connection.get_instance())
+    db = Connection()
+    embed = do_shame(ctx.message, db)
+    db.close()
 
     if embed is not None:
         await ctx.message.channel.send(embed=embed)
@@ -16,12 +18,14 @@ async def shame(ctx):
 
 @shame.command(name="log")
 async def get_shame_logs(ctx):
-    logs = Connection.get_instance().get_shame_logs()
+    db = Connection()
+    logs = db.get_shame_logs()
+    db.close()
 
     embed = Embed(title="Shame Log", color=Color.green())
 
     for log in logs:
-        embed.add_field(name=log[0], value=str(log[2] + "\n" + str(log[3])), inline=False)
+        embed.add_field(name=log[1], value=str(log[2] + "\n" + str(log[3])), inline=False)
 
     await ctx.message.channel.send(embed=embed)
 
