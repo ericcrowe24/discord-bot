@@ -1,5 +1,5 @@
 from discord.ext import commands
-from RGUE import ShameCog
+from RGUE.Cogs import ShameCog
 
 
 class BotClient(commands.Bot):
