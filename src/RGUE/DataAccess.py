@@ -1,9 +1,20 @@
 import mysql.connector as mysql
+from RGUE.Counter import Counter
 
 host, user, password, database = "", "", "", ""
 
 
 class Connection:
+    _Counters = "Counters"
+    _ShameLog = "ShameLog"
+    _ID = "ID"
+    _DiscordID = "DiscordID"
+    _DiscordUserName = "DiscordUserName"
+    _Date = "Date"
+    _TimesCalled = "TimesCalled"
+    _User = "User"
+    _Message = "Message"
+
     def __init__(self):
         self._db = mysql.connect(host=host, user=user, password=password, database=database)
 
@@ -13,23 +24,23 @@ class Connection:
     def create_databases(self):
         cursor = self._db.cursor()
 
-        sql = "CREATE TABLE `Counters` (" \
-              "`ID` int(11) NOT NULL AUTO_INCREMENT," \
-              "`DiscordID` bigint(20) NOT NULL," \
-              "`DiscordUserName` TEXT NULL," \
-              "`Date` datetime NOT NULL," \
-              "`TimesCalled` int(11) NOT NULL," \
-              "PRIMARY KEY (`ID`)" \
+        sql = "CREATE TABLE `" + self._Counters + "` (" \
+              "`" + self._ID + "` int(11) NOT NULL AUTO_INCREMENT," \
+              "`" + self._DiscordID + "` bigint(20) NOT NULL," \
+              "`" + self._DiscordUserName + "` TEXT NULL," \
+              "`" + self._Date + "` datetime NOT NULL," \
+              "`" + self._TimesCalled + "` int(11) NOT NULL," \
+              "PRIMARY KEY (`" + self._ID + "`)" \
               ");"
 
         cursor.execute(sql)
 
-        sql = "CREATE TABLE `ShameLog` (" \
-              "`ID` INT(11) NOT NULL AUTO_INCREMENT," \
-              "`User` VARCHAR(50) NOT NULL," \
-              "`Message` VARCHAR(100) NOT NULL," \
-              "`Date` DATE NOT NULL," \
-              "PRIMARY KEY (`ID`)" \
+        sql = "CREATE TABLE `" + self._ShameLog + "` (" \
+              "`" + self._ID + "` INT(11) NOT NULL AUTO_INCREMENT," \
+              "`" + self._User + "` VARCHAR(50) NOT NULL," \
+              "`" + self._Message + "` VARCHAR(100) NOT NULL," \
+              "`" + self._Date + "` DATE NOT NULL," \
+              "PRIMARY KEY (`" + self._ID + "`)" \
               ");"
 
         cursor.execute(sql)
@@ -41,10 +52,31 @@ class Connection:
     def get_counter_by_discord_id(self, did):
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM Counters WHERE DiscordID = " + str(did)
+        sql = "SELECT * FROM " + self._Counters + " WHERE " + self._DiscordID + " = " + str(did) + ";"
         cursor.execute(sql)
 
-        counters = cursor.fetchall()
+        fetched = cursor.fetchone()
+
+        cursor.close()
+
+        if fetched is None:
+            return None
+        else:
+            return Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[0])
+
+    def get_all_counters(self):
+        cursor = self._db.cursor()
+
+        sql = "SELECT * FROM " + self._Counters + ";"
+
+        cursor.execute(sql)
+
+        fetched = cursor.fetchall()
+
+        counters = []
+
+        for counter in fetched:
+            counters.append(Counter(counter[1], counter[2], counter[3], counter[4], counter[0]))
 
         cursor.close()
 
@@ -53,7 +85,8 @@ class Connection:
     def add_counter(self, counter):
         cursor = self._db.cursor()
 
-        sql = "INSERT INTO Counters (DiscordID, DiscordUserName, Date, TimesCalled) VALUES (%s, %s, %s, %s)"
+        sql = "INSERT INTO " + self._Counters + " (" + self._DiscordID + ", " + self._DiscordUserName + \
+            ", " + self._Date + ", " + self._TimesCalled + ") VALUES (%s, %s, %s, %s);"
 
         values = (counter.DiscordID, counter.UserName, counter.Date, counter.Count)
 
@@ -66,13 +99,13 @@ class Connection:
     def update_counter(self, counter):
         cursor = self._db.cursor()
 
-        sql = "UPDATE Counters SET TimesCalled = '" + str(counter.Count) + "' WHERE DiscordID = '" \
-              + str(counter.DiscordID) + "'"
+        sql = "UPDATE " + self._Counters + " SET " + self._TimesCalled + " = '" + str(counter.Count) \
+              + "' WHERE " + self._DiscordID + " = '" + str(counter.DiscordID) + "';"
 
         cursor.execute(sql)
 
-        sql = "UPDATE Counters SET Date = '" + str(counter.Date) + "' WHERE DiscordID = '" \
-              + str(counter.DiscordID) + "'"
+        sql = "UPDATE " + self._Counters + " SET " + self._Date + " = '" + str(counter.Date) \
+              + "' WHERE " + self._DiscordID + " = '" + str(counter.DiscordID) + "';"
 
         cursor.execute(sql)
 
@@ -83,7 +116,8 @@ class Connection:
     def add_shame_log(self, username, message, date):
         cursor = self._db.cursor()
 
-        sql = "INSERT INTO ShameLog (User, Message, Date) VALUES (%s, %s, %s)"
+        sql = "INSERT INTO " + self._ShameLog + " (" + self._User + ", " + self._Message + ", " \
+              + self._Date + ") VALUES (%s, %s, %s);"
 
         values = (username, message, date)
 
@@ -96,7 +130,7 @@ class Connection:
     def get_shame_logs(self):
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM ShameLog"
+        sql = "SELECT * FROM " + self._ShameLog + ";"
 
         cursor.execute(sql)
 
