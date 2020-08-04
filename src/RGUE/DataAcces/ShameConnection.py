@@ -1,27 +1,13 @@
-import mysql.connector as mysql
-from RGUE.Counter import Counter
-
-host, user, password, database = "", "", "", ""
+from RGUE.DataAcces import BaseConnection
+from RGUE.Cogs.Shame import Counter
 
 
-class Connection:
+class ShameConnection(BaseConnection.BaseConnection):
     _Counters = "Counters"
     _ShameLog = "ShameLog"
-    _ID = "ID"
-    _DiscordID = "DiscordID"
-    _DiscordUserName = "DiscordUserName"
-    _Date = "Date"
     _TimesCalled = "TimesCalled"
-    _User = "User"
-    _Message = "Message"
 
-    def __init__(self):
-        self._db = mysql.connect(host=host, user=user, password=password, database=database)
-
-    def close(self):
-        self._db.close()
-
-    def create_databases(self):
+    def create_tables(self):
         cursor = self._db.cursor()
 
         sql = "CREATE TABLE `" + self._Counters + "` (" \
@@ -62,7 +48,7 @@ class Connection:
         if fetched is None:
             return None
         else:
-            return Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[0])
+            return Counter.Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[0])
 
     def get_all_counters(self):
         cursor = self._db.cursor()
@@ -76,7 +62,7 @@ class Connection:
         counters = []
 
         for counter in fetched:
-            counters.append(Counter(counter[1], counter[2], counter[3], counter[4], counter[0]))
+            counters.append(Counter.Counter(counter[1], counter[2], counter[3], counter[4], counter[0]))
 
         cursor.close()
 
@@ -85,8 +71,12 @@ class Connection:
     def add_counter(self, counter):
         cursor = self._db.cursor()
 
-        sql = "INSERT INTO " + self._Counters + " (" + self._DiscordID + ", " + self._DiscordUserName + \
-            ", " + self._Date + ", " + self._TimesCalled + ") VALUES (%s, %s, %s, %s);"
+        sql = "INSERT INTO " + self._Counters + " (" \
+              + self._DiscordID + ", " \
+              + self._DiscordUserName + ", " \
+              + self._Date + ", " \
+              + self._TimesCalled \
+              + ") VALUES (%s, %s, %s, %s);"
 
         values = (counter.DiscordID, counter.UserName, counter.Date, counter.Count)
 

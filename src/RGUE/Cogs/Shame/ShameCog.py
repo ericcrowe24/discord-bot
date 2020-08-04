@@ -1,9 +1,10 @@
 from discord import Embed
-from discord import utils as dutils
 from discord import Color
 from discord.ext import commands
-from RGUE.DataAccess import Connection
-from RGUE.Counter import Counter
+from RGUE.DataAcces.ShameConnection import ShameConnection
+from RGUE import Utilities
+from RGUE.Cogs.Shame import ShameCounterAccess
+from RGUE.Cogs.Shame import ShameLogAccess
 import datetime
 
 
@@ -14,8 +15,8 @@ class ShameCog(commands.Cog):
 
     @commands.group(name="shame")
     async def shame(self, ctx):
-        db = Connection()
-        embed = self.do_shame(ctx.message, db)
+        db = ShameConnection()
+        embed = self._do_shame(ctx.message)
         db.close()
 
         if embed is not None:
@@ -23,9 +24,7 @@ class ShameCog(commands.Cog):
 
     @shame.command(name="log")
     async def get_shame_logs(self, ctx):
-        db = Connection()
-        logs = db.get_shame_logs()
-        db.close()
+        logs = ShameLogAccess.get_all_shame_logs()
 
         embed = Embed(title="Shame Log", color=Color.light_grey())
 
@@ -36,9 +35,7 @@ class ShameCog(commands.Cog):
 
     @shame.command(name="scoreboard")
     async def scoreboard(self, ctx):
-        db = Connection()
-        counters = db.get_all_counters()
-        db.close()
+        counters = ShameCounterAccess.get_all_counters()
 
         desc = ""
 
@@ -47,11 +44,14 @@ class ShameCog(commands.Cog):
 
         await ctx.message.channel.send(embed=Embed(title="Shame Scoreboard", description=desc, colour=Color.blue()))
 
-    def do_shame(self, message, con):
+    def init_tables(self):
+        db = ShameConnection()
+        db.create_tables()
+        db.close()
+
+    def _do_shame(self, message):
         split = message.content.split()
-        target = split[1]
-        prefix = target[2]
-        did = target[3:-1]
+        did, prefix, target = Utilities.get_target_data(split[1])
 
         del split[0:2]
 
@@ -63,30 +63,37 @@ class ShameCog(commands.Cog):
             did = target[2:-1]
 
         if prefix == '!':
-            return self.shame_user(con, did, message, target, reason)
-
+            return self._shame_user(did, message, target, reason)
         elif prefix == '&':
-            return self.shame_role(con, did, message, reason)
+            return self._shame_role(did, message, reason)
 
-    def shame_user(self, con, did, message, target, reason):
-        counter = self.get_counter(con, did, message)
+    def _shame_user(self, did, message, target, reason):
+        counter = ShameCounterAccess.get_counter(did)
 
-        embed = self.create_shame_embed(counter, target, reason)
+        if counter is None:
+            member = Utilities.find_member_by_id(message, did)
+            ShameCounterAccess.add_counter(member)
+            counter = ShameCounterAccess.get_counter(member.id)
 
-        self.update_counter(con, counter)
+        counter.Count += 1
 
-        con.add_shame_log(counter.UserName,
-                          ("No reason given." if len(reason) == 0 else reason), datetime.datetime.now())
+        embed = self._create_shame_embed(counter, target, reason)
+
+        ShameCounterAccess.update_counter(counter)
+
+        ShameLogAccess.add_shame_log(counter.UserName,
+                                     ("No reason given." if len(reason) == 0 else reason), datetime.datetime.now())
 
         return embed
 
-    def shame_role(self, con, did, message, reason):
-        members = self.find_members_by_role(message, self.find_role(message, did))
+    def _shame_role(self, did, message, reason):
+        members = Utilities.find_members_by_role(message, Utilities.find_role(message, did))
 
         counters = []
 
         for member in members:
-            counters.append(self.get_counter(con, member.id, message))
+            counter = ShameCounterAccess.get_counter(member.id)
+            counters.append(counter)
 
         desc = "Reason: " + ("No reason given." if len(reason) == 0 else reason) + "\n\n"
 
@@ -94,24 +101,13 @@ class ShameCog(commands.Cog):
             desc += ("<@!" + str(counter.DiscordID)
                      + ">\nCount: " + str(counter.Count)
                      + "\nLast Shame: " + str(counter.Date) + "\n\n")
-            self.update_counter(con, counter)
-            con.add_shame_log(counter.UserName, ("No reason given." if len(reason) == 0 else reason),
-                              datetime.datetime.now())
+            ShameCounterAccess.update_counter(counter)
+            ShameLogAccess.add_shame_log(counter.UserName, ("No reason given." if len(reason) == 0 else reason),
+                                         datetime.datetime.now())
 
         return Embed(title="Users shamed", description=desc, color=Color.green())
 
-    def get_counter(self, con, did, message):
-        counter = con.get_counter_by_discord_id(did)
-
-        if counter is None:
-            mem = dutils.find(lambda m: m.id == int(did), message.channel.guild.members)
-            return self.add_counter(mem, con)
-        else:
-            counter.Count += 1
-
-            return counter
-
-    def create_shame_embed(self, counter, target, reason):
+    def _create_shame_embed(self, counter, target, reason):
         diff = datetime.datetime.now() - counter.Date
 
         weeks, days = divmod(diff.days, 7)
@@ -129,30 +125,3 @@ class ShameCog(commands.Cog):
                                  + str(counter.Count)
                                  + "\nReason: " + ("No reason given." if len(reason) == 0 else reason),
                      color=Color.red())
-
-    def update_counter(self, con, counter):
-        counter.Date = datetime.datetime.now()
-
-        con.update_counter(counter)
-
-    def add_counter(self, member, connection):
-        counter = Counter(member.id, member.name, datetime.datetime.now(), 1)
-        connection.add_counter(counter)
-        return counter
-
-    def create_error_embed(self, message):
-        return Embed(title="Error", description=message, color=Color.red())
-
-    def find_role(self, message, target):
-        for r in message.channel.guild.roles:
-            if r.id == int(target):
-                return r
-
-    def find_members_by_role(self, message, role):
-        members = list()
-
-        for member in message.channel.guild.members:
-            if role in member.roles:
-                members.append(member)
-
-        return members
