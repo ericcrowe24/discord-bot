@@ -1,4 +1,4 @@
-from RGUE.bot.data_access.base_connection import BaseConnection
+from ark_bot.bot.data_access.base_connection import BaseConnection
 from economy_module.economy.account import Account
 
 

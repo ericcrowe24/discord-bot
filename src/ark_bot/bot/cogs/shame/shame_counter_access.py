@@ -1,5 +1,5 @@
-from RGUE.bot.Cogs.Shame.Counter import Counter
-from RGUE.bot.data_access.shame_connection import ShameConnection
+from ark_bot.bot.Cogs.Shame.Counter import Counter
+from ark_bot.bot.data_access.shame_connection import ShameConnection
 import datetime
 
 

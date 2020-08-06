@@ -1,4 +1,4 @@
-from RGUE import main
+from ark_bot.bot import main
 import sys
 
 if sys.argv[1] == "-init" or sys.argv[1] == "-i":

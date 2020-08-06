@@ -1,6 +1,6 @@
 from discord.ext import commands
 from economy_module.economy import account_access
-from RGUE.bot.data_access.shame_connection import ShameConnection
+from ark_bot.bot.data_access.shame_connection import ShameConnection
 
 
 class SpendingCog(commands.Cog):

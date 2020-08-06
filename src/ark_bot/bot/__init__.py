@@ -1,5 +1,5 @@
-from RGUE.bot.bot_client import BotClient
-from RGUE.bot.data_access import base_connection
+from ark_bot.bot.bot_client import BotClient
+from ark_bot.bot.data_access import base_connection
 
 
 def main(key, init=False, *, host, user, password, database):
