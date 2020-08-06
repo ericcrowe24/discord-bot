@@ -77,6 +77,7 @@ class AccountCog(commands.Cog):
     async def grant(self, ctx: Context):
         if not ctx.message.author.guild_permissions.administrator:
             await ctx.send("Only administrators can invoke that command.")
+            return
 
         split = ctx.message.content.split()
 
