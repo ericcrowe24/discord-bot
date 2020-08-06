@@ -15,6 +15,10 @@ class BotClient(commands.Bot):
         if economy is not None:
             self._setup_economy_cog(init)
 
+        gambling = iuitl.find_spec("gambling_module")
+        if gambling is not None:
+            self._setup_gambling_cog()
+
     def _setup_economy_cog(self, init):
         from economy_module.economy import spending_cog
         from economy_module.economy import account_cog
@@ -24,6 +28,11 @@ class BotClient(commands.Bot):
 
         if init:
             self.get_cog("AccountCog").init_tables()
+
+    def _setup_gambling_cog(self):
+        from gambling_module.gambling import gambling_cog
+
+        self.add_cog(gambling_cog.GamblingCog(self.get_cog("AccountCog")))
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
