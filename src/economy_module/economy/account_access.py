@@ -1,4 +1,4 @@
-from RGUE.DataAcces.AccountConnection import AccountConnection
+from economy_module.data_access.AccountConnection import AccountConnection
 
 
 def init_tables():

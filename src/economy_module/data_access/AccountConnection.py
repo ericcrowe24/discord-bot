@@ -1,5 +1,5 @@
-from RGUE.DataAcces.BaseConnection import BaseConnection
-from RGUE.Cogs.Economy.Account import Account
+from RGUE.bot.data_access.base_connection import BaseConnection
+from economy_module.economy.account import Account
 
 
 class AccountConnection(BaseConnection):

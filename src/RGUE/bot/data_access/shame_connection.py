@@ -1,8 +1,8 @@
-from RGUE.DataAcces import BaseConnection
-from RGUE.Cogs.Shame import Counter
+from RGUE.bot.data_access import base_connection
+from RGUE.bot.Cogs.Shame import Counter
 
 
-class ShameConnection(BaseConnection.BaseConnection):
+class ShameConnection(base_connection.BaseConnection):
     _Counters = "Counters"
     _ShameLog = "ShameLog"
     _TimesCalled = "TimesCalled"

@@ -1,6 +1,5 @@
-from discord import utils as dutils
-from RGUE.Cogs.Shame.Counter import Counter
-from RGUE.DataAcces.ShameConnection import ShameConnection
+from RGUE.bot.Cogs.Shame.Counter import Counter
+from RGUE.bot.data_access.shame_connection import ShameConnection
 import datetime
 
 

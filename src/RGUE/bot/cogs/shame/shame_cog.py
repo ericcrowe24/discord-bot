@@ -1,10 +1,9 @@
 from discord import Embed
 from discord import Color
 from discord.ext import commands
-from RGUE.DataAcces.ShameConnection import ShameConnection
-from RGUE import Utilities
-from RGUE.Cogs.Shame import ShameCounterAccess
-from RGUE.Cogs.Shame import ShameLogAccess
+from RGUE.bot.data_access.shame_connection import ShameConnection
+from RGUE.bot import utilities
+from RGUE.bot.Cogs.Shame import ShameLogAccess, ShameCounterAccess
 import datetime
 
 
@@ -25,7 +24,7 @@ class ShameCog(commands.Cog):
     async def get_shame_logs(self, ctx):
         logs = ShameLogAccess.get_all_shame_logs(ctx.guild.id)
 
-        embed = Embed(title="Shame Log", color=Color.light_grey())
+        embed = Embed(title="shame Log", color=Color.light_grey())
 
         for log in logs:
             embed.add_field(name=log[3], value=str(log[4] + "\n" + str(log[5])), inline=False)
@@ -41,7 +40,7 @@ class ShameCog(commands.Cog):
         for counter in counters:
             desc += str(counter.DiscordUsername) + ": " + str(counter.Count) + "\n"
 
-        await ctx.send(embed=Embed(title="Shame Scoreboard", description=desc, colour=Color.blue()))
+        await ctx.send(embed=Embed(title="shame Scoreboard", description=desc, colour=Color.blue()))
 
     def init_tables(self):
         db = ShameConnection()
@@ -62,7 +61,7 @@ class ShameCog(commands.Cog):
 
     def _shame_user(self, ctx, target, did, reason):
         counter = ShameCounterAccess.get_counter(ctx.guild.id, did)
-        member = Utilities.find_member_by_id(ctx.guild.members, did)
+        member = utilities.find_member_by_id(ctx.guild.members, did)
 
         if counter is None:
             ShameCounterAccess.add_counter(member)
@@ -80,7 +79,7 @@ class ShameCog(commands.Cog):
         return embed
 
     def _shame_role(self, ctx, did, reason):
-        members = Utilities.find_members_by_role(ctx.guild.members, Utilities.find_role(ctx.guild.roles, did))
+        members = utilities.find_members_by_role(ctx.guild.members, utilities.find_role(ctx.guild.roles, did))
 
         desc = "Reason: " + ("No reason given." if len(reason) == 0 else reason) + "\n\n"
 
@@ -95,7 +94,7 @@ class ShameCog(commands.Cog):
 
             desc += ("<@!" + str(counter.DiscordID)
                      + ">\nCount: " + str(counter.Count)
-                     + "\nLast Shame: " + str(counter.Date) + "\n\n")
+                     + "\nLast shame: " + str(counter.Date) + "\n\n")
             ShameCounterAccess.update_counter(counter)
             ShameLogAccess.add_shame_log(member, ("N/A" if len(reason) == 0 else reason),
                                          datetime.datetime.now())
@@ -110,7 +109,7 @@ class ShameCog(commands.Cog):
         minutes, sec = divmod(diff.seconds, 60)
         hours, minutes = divmod(minutes, 60)
 
-        return Embed(title=counter.DiscordUsername + "'s Shame",
+        return Embed(title=counter.DiscordUsername + "'s shame",
                      description="It has been "
                                  + str(weeks) + " week(s), "
                                  + str(days) + " day(s), "

@@ -1,6 +1,6 @@
 from discord.ext import commands
-from RGUE.Cogs.Economy import AccountAccess
-from RGUE.DataAcces.ShameConnection import ShameConnection
+from economy_module.economy import account_access
+from RGUE.bot.data_access.shame_connection import ShameConnection
 
 
 class SpendingCog(commands.Cog):
@@ -11,7 +11,7 @@ class SpendingCog(commands.Cog):
 
     @spend.command()
     async def shame(self, ctx):
-        account = AccountAccess.get_account_by_did(ctx.author.guild, ctx.author.id)
+        account = account_access.get_account_by_did(ctx.author.guild, ctx.author.id)
 
         db = ShameConnection()
         counter = db.get_counter_by_discord_id(ctx.author.guild, ctx.author.id)
@@ -34,7 +34,7 @@ class SpendingCog(commands.Cog):
         account.ShameReducedCount += 1
         counter.Count -= 1
 
-        AccountAccess.update_account(account)
+        account_access.update_account(account)
         db.update_counter(counter)
         db.close()
 
