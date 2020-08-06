@@ -57,9 +57,6 @@ class AccountCog(commands.Cog):
         target = split[1]
         prefix = target[2]
 
-        print(target[3 if prefix == '!' else 2:-1])
-        print(ctx.author.id)
-
         if str(target[3 if prefix == '!' else 2:-1]) == str(ctx.author.id):
             await ctx.send("Why do you want to give points to yourself?")
             return
@@ -156,3 +153,5 @@ class AccountCog(commands.Cog):
         account.Balance += int(amount)
 
         account_access.update_account(account)
+
+        return 0

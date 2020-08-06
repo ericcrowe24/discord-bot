@@ -1,5 +1,5 @@
 from ark_bot.bot.data_access import base_connection
-from ark_bot.bot.Cogs.Shame import Counter
+from ark_bot.bot.cogs.shame.counter import Counter
 
 
 class ShameConnection(base_connection.BaseConnection):
@@ -52,7 +52,7 @@ class ShameConnection(base_connection.BaseConnection):
         if fetched is None:
             return None
         else:
-            return Counter.Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[5], fetched[0])
+            return Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[5], fetched[0])
 
     def get_all_counters(self, gid):
         cursor = self._db.cursor()
@@ -66,7 +66,7 @@ class ShameConnection(base_connection.BaseConnection):
         counters = []
 
         for counter in fetched:
-            counters.append(Counter.Counter(counter[1], counter[2], counter[3], counter[4], counter[5], counter[0]))
+            counters.append(Counter(counter[1], counter[2], counter[3], counter[4], counter[5], counter[0]))
 
         cursor.close()
 
@@ -103,7 +103,6 @@ class ShameConnection(base_connection.BaseConnection):
         sql = "UPDATE " + self._Counters + " SET " + self._Date + " = '" + str(counter.Date) \
               + "' WHERE " + self._GuildID + " = " + str(counter.GuildID) \
               + " AND " + self._DiscordID + " = " + str(counter.DiscordID) + ";"
-        print(sql)
 
         cursor.execute(sql)
 

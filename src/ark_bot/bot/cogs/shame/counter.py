@@ -1,6 +1,5 @@
 class Counter:
     def __init__(self, gid, did, user, date, count, cid=0):
-        print(date)
         self.id = cid
         self.GuildID = gid
         self.DiscordID = did

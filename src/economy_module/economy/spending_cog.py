@@ -7,7 +7,7 @@ class SpendingCog(commands.Cog):
     @commands.group()
     async def spend(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send("Please specific how you would like to spend your points")
+            await ctx.send("Please specify how you would like to spend your points")
 
     @spend.command()
     async def shame(self, ctx):

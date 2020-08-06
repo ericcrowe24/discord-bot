@@ -1,4 +1,4 @@
-from ark_bot.bot.Cogs.Shame.Counter import Counter
+from .counter import Counter
 from ark_bot.bot.data_access.shame_connection import ShameConnection
 import datetime
 
