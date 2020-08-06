@@ -2,7 +2,7 @@ from RGUE.DataAcces.BaseConnection import BaseConnection
 from RGUE.Cogs.Economy.Account import Account
 
 
-class EconomyConnection(BaseConnection):
+class AccountConnection(BaseConnection):
     _Accounts = "Accounts"
     _Balance = "Balance"
     _ShameReducedCount = "ShameReducedCount"
@@ -12,12 +12,12 @@ class EconomyConnection(BaseConnection):
 
         sql = "CREATE TABLE " + self._Accounts + " (" \
               + self._ID + " INT NOT NULL AUTO_INCREMENT," \
+              + self._GuildID + " BIGINT(20) NOT NULL," \
               + self._DiscordID + " BIGINT(20) NOT NULL," \
               + self._DiscordUserName + " TEXT NOT NULL," \
               + self._Balance + " INT NOT NULL DEFAULT 1," \
-              + self._ShameReducedCount + " INT DEFAULT 0" \
-              + "PRIMARY KEY (" + self._ID + ")" \
-              + ");"
+              + self._ShameReducedCount + " INT DEFAULT 0," \
+              + "PRIMARY KEY (" + self._ID + "));" \
 
         cursor.execute(sql)
 
@@ -29,11 +29,12 @@ class EconomyConnection(BaseConnection):
         cursor = self._db.cursor()
 
         sql = "INSERT INTO " + self._Accounts + "(" \
+              + self._GuildID + ", " \
               + self._DiscordID + ", " \
               + self._DiscordUserName \
-              + ") VALUES (%s, %s);"
+              + ") VALUES (%s, %s, %s);"
 
-        values = (member.id, member.name)
+        values = (member.guild.id, member.id, member.name)
 
         cursor.execute(sql, values)
 
@@ -41,10 +42,10 @@ class EconomyConnection(BaseConnection):
 
         cursor.close()
 
-    def get_all_accounts(self):
+    def get_all_accounts(self, gid):
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM " + self._Accounts
+        sql = "SELECT * FROM " + self._Accounts + " WHERE " + self._GuildID + " = " + str(gid) + ";"
 
         cursor.execute(sql)
         fetched = cursor.fetchall()
@@ -60,10 +61,12 @@ class EconomyConnection(BaseConnection):
 
         return accounts
 
-    def get_account_by_did(self, did):
+    def get_account_by_did(self, gid, did):
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM " + self._Accounts + " WHERE " + self._DiscordID + " = " + str(did)
+        sql = "SELECT * FROM " + self._Accounts \
+              + " WHERE " + self._GuildID + " = " + str(gid) \
+              + " AND " + self._DiscordID + " = " + str(did) + ";"
 
         cursor.execute(sql)
         fetched = cursor.fetchone()
@@ -78,7 +81,15 @@ class EconomyConnection(BaseConnection):
         cursor = self._db.cursor()
 
         sql = "UPDATE " + self._Accounts + " SET " + self._Balance + " = " + str(account.Balance) \
-              + " WHERE " + self._DiscordID + " = " + str(account.DiscordID)
+              + " WHERE " + self._GuildID + " = " + str(account.GuildID)\
+              + " AND " + self._DiscordID + " = " + str(account.DiscordID) + ";"
+
+        cursor.execute(sql)
+
+        sql = "UPDATE " + self._Accounts + " SET " + self._ShameReducedCount + " = " \
+              + str(account.ShameReducedCount) \
+              + " WHERE " + self._GuildID + " = " + str(account.GuildID)\
+              + " AND " + self._DiscordID + " = " + str(account.DiscordID) + ";"
 
         cursor.execute(sql)
 
@@ -88,5 +99,5 @@ class EconomyConnection(BaseConnection):
 
     # noinspection PyMethodMayBeStatic
     def _create_account_object(self, acc) -> Account:
-        account = Account(acc[1], acc[2], acc[3], acc[0])
+        account = Account(acc[1], acc[2], acc[3], acc[4], acc[5], acc[0])
         return account

@@ -1,9 +1,9 @@
 from RGUE.DataAcces.ShameConnection import ShameConnection
 
 
-def get_all_shame_logs():
+def get_all_shame_logs(gid):
     db = ShameConnection()
-    logs = db.get_shame_logs()
+    logs = db.get_shame_logs(gid)
     return logs
 
 

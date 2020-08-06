@@ -5,6 +5,7 @@ host, user, password, database = "", "", "", ""
 
 class BaseConnection:
     _ID = "ID"
+    _GuildID = "GuildID"
     _DiscordID = "DiscordID"
     _DiscordUserName = "DiscordUserName"
     _Date = "Date"

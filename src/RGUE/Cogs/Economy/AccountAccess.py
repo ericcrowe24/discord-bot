@@ -1,27 +1,27 @@
-from RGUE.DataAcces.EconomyConnection import EconomyConnection
+from RGUE.DataAcces.AccountConnection import AccountConnection
 
 
 def init_tables():
-    db = EconomyConnection()
+    db = AccountConnection()
     db.create_tables()
     db.close()
 
 
 def add_account(author):
-    db = EconomyConnection()
+    db = AccountConnection()
     db.add_account(author)
     db.close()
 
 
-def get_account_by_did(did):
-    db = EconomyConnection()
-    account = db.get_account_by_did(did)
+def get_account_by_did(gid, did):
+    db = AccountConnection()
+    account = db.get_account_by_did(gid, did)
     db.close()
 
     return account
 
 
 def update_account(account):
-    db = EconomyConnection()
+    db = AccountConnection()
     db.update_account(account)
     db.close()
