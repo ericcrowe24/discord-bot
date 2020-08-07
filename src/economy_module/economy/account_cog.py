@@ -25,7 +25,7 @@ class AccountCog(commands.Cog):
             account.Balance += 1
             account_access.update_account(account)
 
-    @commands.command(aliases=["bal"])
+    @commands.command(aliases=["bal"], help="Get a dm with your balance for this server.")
     async def balance(self, ctx: Context):
         member = ctx.author
         account = account_access.get_account_by_did(member.guild.id, member.id)
@@ -40,7 +40,7 @@ class AccountCog(commands.Cog):
         else:
             await member.dm_channel.send("Your balance is: " + str(account.Balance))
 
-    @commands.command()
+    @commands.command(help="Give points to another user.")
     async def give(self, ctx: Context):
         split = ctx.message.content.split()
 
@@ -73,7 +73,7 @@ class AccountCog(commands.Cog):
         else:
             await ctx.send("You can only give points to users.")
 
-    @commands.group()
+    @commands.group(help="Grant points to a user or all users under a role. Admin only")
     async def grant(self, ctx: Context):
         if not ctx.message.author.guild_permissions.administrator:
             await ctx.send("Only administrators can invoke that command.")
@@ -120,7 +120,7 @@ class AccountCog(commands.Cog):
 
         return error
 
-    @grant.command(name="all")
+    @grant.command(name="all", help="Grant all users points. Admin only")
     async def grant_all(self, ctx):
         amount = ctx.message.content.split()[2]
 

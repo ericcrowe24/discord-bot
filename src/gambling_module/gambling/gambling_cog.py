@@ -4,11 +4,15 @@ import random as rand
 
 
 class GamblingCog(commands.Cog):
+    _gamble_help = "Gamble your points on games of chance!\n" \
+                   "Available games:\n" \
+                   "random, random20, random50, random100"
+
     def __init__(self, acc_cog: account_cog.AccountCog):
         super(GamblingCog, self).__init__()
         self._account = acc_cog
 
-    @commands.group(aliases=["gamble"])
+    @commands.group(aliases=["gamble"], help=_gamble_help)
     async def bet(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Please specify how you would like to gamble.")

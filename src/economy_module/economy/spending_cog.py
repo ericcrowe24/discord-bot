@@ -9,7 +9,7 @@ class SpendingCog(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send("Please specify how you would like to spend your points")
 
-    @spend.command()
+    @spend.command(help="Spend points to reduce your shame count by 1.")
     async def shame(self, ctx):
         account = account_access.get_account_by_did(ctx.author.guild.id, ctx.author.id)
 
@@ -41,7 +41,7 @@ class SpendingCog(commands.Cog):
         await ctx.send("Congratulations! You reduced your shame by 1! "
                        "Now stop doing things to get shamed for.")
 
-    @spend.command()
+    @spend.command(help="Spend points to increase your shame count by 1.")
     async def shameless(self, ctx):
         account = account_access.get_account_by_did(ctx.author.guild.id, ctx.author.id)
 

@@ -12,7 +12,7 @@ class ShameCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name="shame")
+    @commands.group(name="shame", help="Shame a user or all users under a role")
     async def shame(self, ctx):
         if ctx.invoked_subcommand is None:
             embed = self._do_shame(ctx)
@@ -20,7 +20,7 @@ class ShameCog(commands.Cog):
             if embed is not None:
                 await ctx.send(embed=embed)
 
-    @shame.command(name="log")
+    @shame.command(name="log", help="Show all of the same logs.")
     async def get_shame_logs(self, ctx):
         logs = shame_log_access.get_all_shame_logs(ctx.guild.id)
 
@@ -31,7 +31,7 @@ class ShameCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @shame.command(aliases=["score"])
+    @shame.command(aliases=["score"], help="Show all users' shame counters.")
     async def scoreboard(self, ctx):
         counters = shame_counter_access.get_all_counters(ctx.guild.id)
 
