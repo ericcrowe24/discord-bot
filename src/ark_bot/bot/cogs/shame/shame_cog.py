@@ -53,7 +53,7 @@ class Shame(commands.Cog):
         target = split[1]
         prefix = target[2]
 
-        reason = " ".join(split[2:-1])
+        reason = " ".join(split[2:])
 
         if prefix == '!' or '0' <= prefix <= '9':
             return self._shame_user(ctx, target, target[3 if prefix == '!' else 2:-1], reason)
