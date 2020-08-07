@@ -14,7 +14,6 @@ class ShameConnection(base_connection.BaseConnection):
               + self._ID + " int(11) NOT NULL AUTO_INCREMENT," \
               + self._GuildID + " BIGINT(20) NOT NULL," \
               + self._DiscordID + " bigint(20) NOT NULL," \
-              + self._DiscordUserName + " TEXT NULL," \
               + self._Date + " datetime NOT NULL," \
               + self._TimesCalled + " int(11) NOT NULL," \
                                     " PRIMARY KEY (" + self._ID + "));"
@@ -25,7 +24,6 @@ class ShameConnection(base_connection.BaseConnection):
               + self._ID + " INT(11) NOT NULL AUTO_INCREMENT," \
               + self._GuildID + " BIGINT(20) NOT NULL," \
               + self._DiscordID + " BIGINT(20) NOT NULL," \
-              + self._DiscordUserName + " VARCHAR(50) NOT NULL," \
               + self._Message + " VARCHAR(100) NOT NULL," \
               + self._Date + " DATE NOT NULL," \
                              "PRIMARY KEY (" + self._ID + "));"
@@ -52,7 +50,7 @@ class ShameConnection(base_connection.BaseConnection):
         if fetched is None:
             return None
         else:
-            return Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[5], fetched[0])
+            return Counter(fetched[1], fetched[2], fetched[3], fetched[4], fetched[0])
 
     def get_all_counters(self, gid):
         cursor = self._db.cursor()
@@ -66,7 +64,7 @@ class ShameConnection(base_connection.BaseConnection):
         counters = []
 
         for counter in fetched:
-            counters.append(Counter(counter[1], counter[2], counter[3], counter[4], counter[5], counter[0]))
+            counters.append(Counter(counter[1], counter[2], counter[3], counter[4], counter[0]))
 
         cursor.close()
 
@@ -78,12 +76,11 @@ class ShameConnection(base_connection.BaseConnection):
         sql = "INSERT INTO " + self._Counters + " (" \
               + self._GuildID + ", " \
               + self._DiscordID + ", " \
-              + self._DiscordUserName + ", " \
               + self._Date + ", " \
               + self._TimesCalled \
-              + ") VALUES (%s, %s, %s, %s, %s);"
+              + ") VALUES (%s, %s, %s, %s);"
 
-        values = (str(counter.GuildID), counter.DiscordID, counter.DiscordUsername, counter.Date, counter.Count)
+        values = (str(counter.GuildID), counter.DiscordID, counter.Date, counter.Count)
 
         cursor.execute(sql, values)
 
@@ -116,12 +113,11 @@ class ShameConnection(base_connection.BaseConnection):
         sql = "INSERT INTO " + self._ShameLog + " (" \
               + self._GuildID + ", " \
               + self._DiscordID + ", " \
-              + self._DiscordUserName + ", " \
               + self._Message + ", " \
               + self._Date \
-              + ") VALUES (%s, %s, %s, %s, %s);"
+              + ") VALUES (%s, %s, %s, %s);"
 
-        values = (str(target.guild.id), str(target.id), target.name, message, date)
+        values = (str(target.guild.id), str(target.id), message, date)
 
         cursor.execute(sql, values)
 

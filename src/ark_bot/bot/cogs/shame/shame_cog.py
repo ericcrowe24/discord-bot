@@ -8,7 +8,7 @@ import datetime
 
 
 # noinspection PyMethodMayBeStatic
-class ShameCog(commands.Cog):
+class Shame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,7 +27,8 @@ class ShameCog(commands.Cog):
         embed = Embed(title="shame Log", color=Color.light_grey())
 
         for log in logs:
-            embed.add_field(name=log[3], value=str(log[4] + "\n" + str(log[5])), inline=False)
+            member = utilities.find_member_by_id(ctx.guild.members, log[2])
+            embed.add_field(name=member.name, value=str(log[3] + "\n" + str(log[4])), inline=False)
 
         await ctx.send(embed=embed)
 
@@ -69,7 +70,7 @@ class ShameCog(commands.Cog):
 
         counter.Count += 1
 
-        embed = self._create_shame_embed(counter, target, reason)
+        embed = self._create_shame_embed(member.name, counter, target, reason)
 
         shame_counter_access.update_counter(counter)
 
@@ -101,14 +102,14 @@ class ShameCog(commands.Cog):
 
         return Embed(title="Users shamed", description=desc, color=Color.green())
 
-    def _create_shame_embed(self, counter, target, reason):
+    def _create_shame_embed(self, name, counter, target, reason):
         diff = datetime.datetime.now() - counter.Date
 
         weeks, days = divmod(diff.days, 7)
         minutes, sec = divmod(diff.seconds, 60)
         hours, minutes = divmod(minutes, 60)
 
-        return Embed(title=counter.DiscordUsername + "'s shame",
+        return Embed(title=name + "'s shame",
                      description="It has been "
                                  + str(weeks) + " week(s), "
                                  + str(days) + " day(s), "

@@ -9,7 +9,10 @@ class BotClient(commands.Bot):
         self._setup_cogs(init)
 
     def _setup_cogs(self, init):
-        self.add_cog(shame_cog.ShameCog(self))
+        self.add_cog(shame_cog.Shame(self))
+
+        if init:
+            self.get_cog("Shame").init_tables()
 
         economy = iuitl.find_spec("economy_module")
         if economy is not None:
@@ -23,16 +26,16 @@ class BotClient(commands.Bot):
         from economy_module.economy import spending_cog
         from economy_module.economy import account_cog
 
-        self.add_cog(account_cog.AccountCog(self))
+        self.add_cog(account_cog.Account(self))
         self.add_cog(spending_cog.SpendingCog(self))
 
         if init:
-            self.get_cog("AccountCog").init_tables()
+            self.get_cog("Account").init_tables()
 
     def _setup_gambling_cog(self):
         from gambling_module.gambling import gambling_cog
 
-        self.add_cog(gambling_cog.GamblingCog(self.get_cog("AccountCog")))
+        self.add_cog(gambling_cog.Gambling(self.get_cog("Account")))
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))

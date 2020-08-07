@@ -3,13 +3,13 @@ from economy_module.economy import account_cog
 import random as rand
 
 
-class GamblingCog(commands.Cog):
+class Gambling(commands.Cog):
     _gamble_help = "Gamble your points on games of chance!\n" \
                    "Available games:\n" \
                    "random, random20, random50, random100"
 
-    def __init__(self, acc_cog: account_cog.AccountCog):
-        super(GamblingCog, self).__init__()
+    def __init__(self, acc_cog: account_cog.Account):
+        super(Gambling, self).__init__()
         self._account = acc_cog
 
     @commands.group(aliases=["gamble"], help=_gamble_help)

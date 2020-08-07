@@ -2,11 +2,11 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from . import account_access
 from ark_bot.bot import utilities
-from economy_module.data_access.AccountConnection import AccountConnection
+from economy_module.data_access.account_connection import AccountConnection
 
 
 # noinspection PyMethodMayBeStatic
-class AccountCog(commands.Cog):
+class Account(commands.Cog):
     def init_tables(self):
         db = AccountConnection()
         db.create_tables()
@@ -75,6 +75,9 @@ class AccountCog(commands.Cog):
 
     @commands.group(help="Grant points to a user or all users under a role. Admin only")
     async def grant(self, ctx: Context):
+        if ctx.invoked_subcommand is not None:
+            return
+
         if not ctx.message.author.guild_permissions.administrator:
             await ctx.send("Only administrators can invoke that command.")
             return
@@ -122,10 +125,13 @@ class AccountCog(commands.Cog):
 
     @grant.command(name="all", help="Grant all users points. Admin only")
     async def grant_all(self, ctx):
-        amount = ctx.message.content.split()[2]
+        async with ctx.channel.typing():
+            amount = ctx.message.content.split()[2]
 
-        for member in ctx.message.channel.guild.members:
-            self._grant_user(ctx, member.id, amount)
+            for member in ctx.message.channel.guild.members:
+                if member.bot:
+                    continue
+                self._grant_user(ctx, member.id, amount)
 
         await ctx.message.channel.send("Granted all users " + amount + " points!")
 

@@ -1,4 +1,4 @@
-from economy_module.data_access.AccountConnection import AccountConnection
+from economy_module.data_access.account_connection import AccountConnection
 
 
 def init_tables():

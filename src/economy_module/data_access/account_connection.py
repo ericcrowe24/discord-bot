@@ -14,7 +14,6 @@ class AccountConnection(BaseConnection):
               + self._ID + " INT NOT NULL AUTO_INCREMENT," \
               + self._GuildID + " BIGINT(20) NOT NULL," \
               + self._DiscordID + " BIGINT(20) NOT NULL," \
-              + self._DiscordUserName + " TEXT NOT NULL," \
               + self._Balance + " INT NOT NULL DEFAULT 1," \
               + self._ShameReducedCount + " INT DEFAULT 0," \
               + "PRIMARY KEY (" + self._ID + "));" \
@@ -30,11 +29,10 @@ class AccountConnection(BaseConnection):
 
         sql = "INSERT INTO " + self._Accounts + "(" \
               + self._GuildID + ", " \
-              + self._DiscordID + ", " \
-              + self._DiscordUserName \
-              + ") VALUES (%s, %s, %s);"
+              + self._DiscordID \
+              + ") VALUES (%s, %s);"
 
-        values = (member.guild.id, member.id, member.name)
+        values = (member.guild.id, member.id)
 
         cursor.execute(sql, values)
 
@@ -99,5 +97,5 @@ class AccountConnection(BaseConnection):
 
     # noinspection PyMethodMayBeStatic
     def _create_account_object(self, acc) -> Account:
-        account = Account(acc[1], acc[2], acc[3], acc[4], acc[5], acc[0])
+        account = Account(acc[1], acc[2], acc[3], acc[4], acc[0])
         return account

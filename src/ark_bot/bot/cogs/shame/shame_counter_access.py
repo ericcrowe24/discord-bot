@@ -28,7 +28,7 @@ def update_counter(counter):
 
 
 def add_counter(member):
-    counter = Counter(member.guild.id, member.id, member.name, datetime.datetime.now(), 1)
+    counter = Counter(member.guild.id, member.id, datetime.datetime.now(), 1)
 
     db = ShameConnection()
     db.add_counter(counter)
