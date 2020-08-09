@@ -1,4 +1,4 @@
-from ark_bot.bot.data_access.shame_connection import ShameConnection
+from rgue_bot.bot.data_access.shame_connection import ShameConnection
 
 
 def get_all_shame_logs(gid):

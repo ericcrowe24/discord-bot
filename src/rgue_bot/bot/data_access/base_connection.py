@@ -7,9 +7,7 @@ class BaseConnection:
     _ID = "ID"
     _GuildID = "GuildID"
     _DiscordID = "DiscordID"
-    _DiscordUserName = "DiscordUserName"
     _Date = "Date"
-    _User = "User"
     _Message = "Message"
 
     def __init__(self):

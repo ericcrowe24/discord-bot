@@ -1,6 +1,6 @@
 from importlib import util as iuitl
 from discord.ext import commands
-from ark_bot.bot.cogs.shame import shame_cog
+from rgue_bot.bot.cogs.shame import shame_cog
 
 
 class BotClient(commands.Bot):
