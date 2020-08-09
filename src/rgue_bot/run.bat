@@ -1,1 +1,0 @@
-py ./bot/__init__.py NzM5OTEyNzc0OTA5NDI3ODUz.XyhXeA.C3i8yzZdkAqA7ooBTh23HLWPN0c 192.168.1.116 24234akakro RGUETest
