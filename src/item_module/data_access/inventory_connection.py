@@ -5,8 +5,7 @@ from item_module.inventory.inventory import Inventory
 
 class InventoryConnection(base_connection.BaseConnection):
     _Inventories = "Inventories"
-    _ItemID = "ItemID"
-    _Quantity = "Quantity"
+    _InventoryID = "InventoryID"
 
     def create_tables(self):
         cursor = self._db.cursor()
@@ -24,11 +23,13 @@ class InventoryConnection(base_connection.BaseConnection):
         if cursor.fetchone() is not None:
             sql = "CREATE TABLES %s (" \
                   + "%s INT NOT NULL AUTO_INCREMENT, " \
+                  + "%s INT NOT NULL, "\
                   + "%s BIGINT(20) NOT NULL, " \
                   + "%s BIGINT(20) NOT NULL, " \
                   + "PRIMARY KEY (%s));"
             values = (self._Inventories,
                       self._ID,
+                      self._InventoryID,
                       self._GuildID,
                       self._DiscordID,
                       self._ID)
@@ -42,8 +43,10 @@ class InventoryConnection(base_connection.BaseConnection):
     def add_inventory(self, gid: int, did: int):
         cursor = self._db.cursor()
 
-        sql = "INSERT INTO %s (%s, %s) VALUES (%s, %s);"
-        values = (self._Inventories, self._GuildID, self._DiscordID, str(gid), str(did))
+        iid = self.get_guild_inventories(gid)[-1].InventoryID
+
+        sql = "INSERT INTO %s (%s, %s, %s) VALUES (%s, %s, %s);"
+        values = (self._Inventories, self._InventoryID, self._GuildID, self._DiscordID, str(iid + 1), str(gid), str(did))
 
         cursor.execute(sql, values)
 

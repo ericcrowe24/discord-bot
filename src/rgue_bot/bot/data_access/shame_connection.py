@@ -34,6 +34,24 @@ class ShameConnection(base_connection.BaseConnection):
 
         cursor.close()
 
+    def add_counter(self, counter):
+        cursor = self._db.cursor()
+
+        sql = "INSERT INTO " + self._Counters + " (" \
+              + self._GuildID + ", " \
+              + self._DiscordID + ", " \
+              + self._Date + ", " \
+              + self._TimesCalled \
+              + ") VALUES (%s, %s, %s, %s);"
+
+        values = (str(counter.GuildID), counter.DiscordID, counter.Date, counter.Count)
+
+        cursor.execute(sql, values)
+
+        self._db.commit()
+
+        cursor.close()
+
     def get_counter_by_discord_id(self, gid, did):
         cursor = self._db.cursor()
 
@@ -69,24 +87,6 @@ class ShameConnection(base_connection.BaseConnection):
         cursor.close()
 
         return counters
-
-    def add_counter(self, counter):
-        cursor = self._db.cursor()
-
-        sql = "INSERT INTO " + self._Counters + " (" \
-              + self._GuildID + ", " \
-              + self._DiscordID + ", " \
-              + self._Date + ", " \
-              + self._TimesCalled \
-              + ") VALUES (%s, %s, %s, %s);"
-
-        values = (str(counter.GuildID), counter.DiscordID, counter.Date, counter.Count)
-
-        cursor.execute(sql, values)
-
-        self._db.commit()
-
-        cursor.close()
 
     def update_counter(self, counter):
         cursor = self._db.cursor()

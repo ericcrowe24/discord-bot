@@ -10,17 +10,10 @@ class Rarity(enum.Enum):
 
 
 class Item:
-    def __init__(self, gid: int, name: str, desc: str, rarity: Rarity, iid=0):
+    def __init__(self, id: int, iid: int, gid: int, name: str, desc: str, rarity: Rarity):
+        self.ID = id
         self.ItemID = iid
         self.GuildID = gid
         self.Name = name
         self.Description = desc
         self.Rarity = rarity
-
-
-class UserItem:
-    def __init__(self, gid: int, uid: int, amt: int, iid=0):
-        self.ItemID = iid
-        self.GuildID = gid
-        self.UserID = uid
-        self.Amount = amt
