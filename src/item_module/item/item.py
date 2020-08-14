@@ -2,11 +2,11 @@ import enum
 
 
 class Rarity(enum.Enum):
-    COMMON = enum.auto()
-    UNCOMMON = enum.auto()
-    RARE = enum.auto()
-    LEGENDARY = enum.auto()
-    UNIQUE = enum.auto()
+    Common = enum.auto()
+    Uncommon = enum.auto()
+    Rare = enum.auto()
+    Legendary = enum.auto()
+    Unique = enum.auto()
 
 
 class Item:

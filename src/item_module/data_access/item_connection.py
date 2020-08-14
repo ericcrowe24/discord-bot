@@ -1,7 +1,4 @@
 from typing import List
-
-from mysql.connector.errors import MySQLFabricError
-
 from rgue_bot.bot.data_access import base_connection
 from item_module.item.item import Item, Rarity
 
@@ -14,26 +11,19 @@ class ItemConnection(base_connection.BaseConnection):
     _Rarity = "Rarity"
 
     def create_tables(self):
+        if self.check_table_exists(self._Items):
+            return
+
         cursor = self._db.cursor()
 
-        sql = "CREATE TABLE %s (" \
-              "%s INT(11) NOT NULL AUTO_INCREMENT," \
-              " %s INT(11) NOT NULL," \
-              " %s BIGINT(20) NOT NULL," \
-              " %s CHAR(255) NOT NULL," \
-              " %s CHAR(255) NOT NULL," \
-              " %s INT NOT NULL," \
-              " PRIMARY KEY(%s));"
-        values = (self._Items,
-                  self._ID,
-                  self._ItemID,
-                  self._GuildID,
-                  self._Name,
-                  self._Desc,
-                  self._Rarity,
-                  self._ID)
+        sql = "CREATE TABLE {} ({} INT(11) NOT NULL AUTO_INCREMENT, " \
+              "{} INT(11) NOT NULL, {} BIGINT(20) NOT NULL, {} CHAR(255) NOT NULL, " \
+              "{} CHAR(255) NOT NULL, {} INT NOT NULL, PRIMARY KEY({}));"
 
-        cursor.execute(sql, values)
+        formatted = sql.format(self._Items, self._ID, self._ItemID, self._GuildID,
+                               self._Name, self._Desc, self._Rarity, self._ID)
+
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -42,25 +32,28 @@ class ItemConnection(base_connection.BaseConnection):
     def add_item(self, item: Item) -> bool:
         cursor = self._db.cursor()
 
-        iid = self.get_all_guild_items(item.GuildID)[-1].ItemID
+        items = self.get_all_guild_items(item.GuildID)
 
-        sql = "INSERT INTO %s (" \
-              + "%s, " \
-              + "%s, " \
-              + "%s, " \
-              + "%s, " \
-              + "%s, " \
-              + "VALUES(%s, %s, %s, %s, %s);"
-        values = (self._Items,
-                  self._ItemID,
-                  self._GuildID,
-                  self._Name,
-                  self._Desc,
-                  self._Rarity,
-                  str(iid + 1), str(item.GuildID), item.Name, item.Description, str(item.Rarity.value))
+        iid = items[-1].ItemID if len(items) > 0 else 0
 
-        cursor.execute(sql, values)
-        
+        sql = "INSERT INTO {} (" \
+              + "{}, " \
+              + "{}, " \
+              + "{}, " \
+              + "{}, " \
+              + "{}) " \
+              + "VALUES({}, {}, '{}', '{}', {});"
+        formatted = sql.format(self._Items,
+                               self._ItemID,
+                               self._GuildID,
+                               self._Name,
+                               self._Desc,
+                               self._Rarity,
+                               str(iid + 1), str(item.GuildID), item.Name, item.Description, str(item.Rarity.value))
+        print(formatted)
+
+        cursor.execute(formatted)
+
         self._db.commit()
 
         cursor.close()
@@ -70,14 +63,14 @@ class ItemConnection(base_connection.BaseConnection):
     def get_item_by_id(self, gid: int, iid: int) -> Item:
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM %s " \
-              "WHERE %s = %s " \
-              "AND %s = %s;"
-        values = (self._Items,
-                  self._GuildID, str(gid),
-                  self._ItemID, str(iid))
+        sql = "SELECT * FROM {} " \
+              "WHERE {} = {} " \
+              "AND {} = {};"
+        formatted = sql.format(self._Items,
+                               self._GuildID, str(gid),
+                               self._ItemID, str(iid))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         item = self._create_item(cursor.fetchone())
 
@@ -88,32 +81,14 @@ class ItemConnection(base_connection.BaseConnection):
     def get_items_by_rarity(self, gid: int, rarity: Rarity) -> List[Item]:
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM %s " \
-              "WHERE %s = %s " \
-              "AND %s = %s;"
-        values = (self._Items,
-                  self._GuildID, str(gid),
-                  self._Rarity, str(rarity.value()))
+        sql = "SELECT * FROM {} " \
+              "WHERE {} = {} " \
+              "AND {} = {};"
+        formatted = sql.format(self._Items,
+                               self._GuildID, str(gid),
+                               self._Rarity, str(rarity.value))
 
-        cursor.execute(sql, values)
-
-        fetched = cursor.fetchall()
-        cursor.close()
-
-        items = []
-
-        for itm in fetched:
-            items.append(itm)
-
-        return items
-
-    def get_all_guild_items(self, gid: int) -> List[Item]:
-        cursor = self._db.cursor()
-
-        sql = "SELECT * FROM %s WHERE %s = %s;"
-        values = (self._Items, self._GuildID, str(gid))
-
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         fetched = cursor.fetchall()
         cursor.close()
@@ -121,23 +96,42 @@ class ItemConnection(base_connection.BaseConnection):
         items = []
 
         for item in fetched:
-            items.append(item)
+            items.append(self._create_item(item))
+
+        return items
+
+    def get_all_guild_items(self, gid: int) -> List[Item]:
+        cursor = self._db.cursor()
+
+        sql = "SELECT * FROM {} WHERE {} = {};"
+        formatted = sql.format(self._Items, self._GuildID, str(gid))
+
+        cursor.execute(formatted)
+
+        fetched = cursor.fetchall()
+        cursor.close()
+
+        items = []
+
+        for item in fetched:
+            items.append(self._create_item(item))
 
         return items
 
     def update_item(self, item: Item):
         cursor = self._db.cursor()
 
-        sql = "UPDATE %s " \
-              "SET %s = %s, %s = %s, %s = %s " \
-              "WHERE %s = %s " \
-              "AND %s = %s;"
-        values = (self._Items,
-                  self._Name, item.Name, self._Desc, item.Description, self._Rarity, int(item.Rarity.value()),
-                  self._GuildID, item.GuildID,
-                  self._ItemID, item.ItemID)
+        sql = "UPDATE {} " \
+              "SET {} = {}, {} = {}, {} = {} " \
+              "WHERE {} = {} " \
+              "AND {} = {};"
+        formatted = sql.format(self._Items,
+                               self._Name, item.Name, self._Desc, item.Description, self._Rarity,
+                               int(item.Rarity.value()),
+                               self._GuildID, item.GuildID,
+                               self._ItemID, item.ItemID)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -146,10 +140,10 @@ class ItemConnection(base_connection.BaseConnection):
     def delete_item(self, item: Item):
         cursor = self._db.cursor()
 
-        sql = "DELETE FROM %s WHERE %s = %s AND %s = %s;"
-        values = (self._Items, self._GuildID, str(item.GuildID), self._ItemID, str(item.ItemID))
+        sql = "DELETE FROM {} WHERE {} = {} AND {} = {};"
+        formatted = sql.format(self._Items, self._GuildID, str(item.GuildID), self._ItemID, str(item.ItemID))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 

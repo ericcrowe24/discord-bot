@@ -4,6 +4,12 @@ from item_module.data_access.item_connection import ItemConnection
 from item_module.item.item import Item, Rarity
 
 
+def create_tables():
+    db = ItemConnection()
+    db.create_tables()
+    db.close()
+
+
 def add_item(item: Item) -> bool:
     db = ItemConnection()
     success = db.add_item(item)

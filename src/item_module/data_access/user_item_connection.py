@@ -11,7 +11,29 @@ class UserItemConnection(BaseConnection):
     _Amount = "Amount"
 
     def create_tables(self):
-        raise NotImplementedError
+        if self.check_table_exists(self._UserItems):
+            return
+
+        cursor = self._db.cursor()
+
+        sql = "CREATE TABLE %s (" \
+              "%s INT NOT NULL AUTO INCREMENT, " \
+              "%s INT NOT NULL, " \
+              "%s INT NOT NULL, " \
+              "%s INT NOT NULL, " \
+              "PRIMARY KEY(%s));"
+        values = (self._UserItems,
+                  self._ID,
+                  self._ItemID,
+                  self._InventoryID,
+                  self._Amount,
+                  self._ID)
+
+        cursor.execute(sql, values)
+
+        self._db.commit()
+
+        cursor.close()
 
     def add_user_item(self, item: UserItem):
         cursor = self._db.cursor()
