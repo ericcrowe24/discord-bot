@@ -1,11 +1,9 @@
 from discord.ext import commands
 from discord.ext.commands import Context
-from . import account_access
 from rgue_bot.bot import utilities
 from economy_module.data_access.account_connection import AccountConnection
 
 
-# noinspection PyMethodMayBeStatic
 class Account(commands.Cog):
     def init_tables(self):
         db = AccountConnection()
@@ -17,22 +15,22 @@ class Account(commands.Cog):
         if message.author.bot:
             return
 
-        account = account_access.get_account_by_did(message.author.guild.id, message.author.id)
+        account = get_account_by_did(message.author.guild.id, message.author.id)
 
         if account is None:
-            account_access.add_account(message.author)
+            add_account(message.author)
         else:
             account.Balance += 1
-            account_access.update_account(account)
+            update_account(account)
 
     @commands.command(aliases=["bal"], help="Get a dm with your balance for this server.")
     async def balance(self, ctx: Context):
         member = ctx.author
-        account = account_access.get_account_by_did(member.guild.id, member.id)
+        account = get_account_by_did(member.guild.id, member.id)
 
         if account is None:
-            account_access.add_account(member)
-            account = account_access.get_account_by_did(member.guild.id, member.id)
+            add_account(member)
+            account = get_account_by_did(member.guild.id, member.id)
 
         if member.dm_channel is None:
             dm = await member.create_dm()
@@ -40,31 +38,27 @@ class Account(commands.Cog):
         else:
             await member.dm_channel.send("Your balance is: " + str(account.Balance))
 
-    @commands.command(help="Give points to another user.")
-    async def give(self, ctx: Context):
-        split = ctx.message.content.split()
-
-        amount = split[2]
-
+    @commands.command(help="Donate points to another user.")
+    async def donate(self, ctx: Context, target, amount):
         try:
             if int(amount) < 0:
-                await ctx.send("You can't take point from someone like that. Nice try, however.")
+                await ctx.send("You can't take points from someone like that. Nice try, however.")
                 return
         except ValueError:
-            await ctx.send("The amount has to be in number format. -_-")
+            await ctx.send("The amount has to be in number format. -_-'")
             return
 
-        target = split[1]
         prefix = target[2]
 
         if str(target[3 if prefix == '!' else 2:-1]) == str(ctx.author.id):
-            await ctx.send("Why do you want to give points to yourself?")
+            await ctx.send("Why do you want to donate points to yourself?")
             return
 
         error = self.withdraw(ctx.author, amount)
 
         if error == 1 or error == 2:
             await ctx.send("You don't have enough points. Better get to typing.")
+            return
 
         if prefix == '!' or '0' <= prefix <= '9':
             member = utilities.find_member_by_id(ctx.guild.members, target[3 if prefix == '!' else 2:-1])
@@ -91,7 +85,7 @@ class Account(commands.Cog):
                 await ctx.send("Grant amount has to be a positive number.")
                 return
         except ValueError:
-            await ctx.send("Grant amount has to be in number format. -_-")
+            await ctx.send("Grant amount has to be in number format. -_-'")
             return
 
         target = split[1]
@@ -136,7 +130,7 @@ class Account(commands.Cog):
         await ctx.message.channel.send("Granted all users " + amount + " points!")
 
     def withdraw(self, target, amount):
-        account = account_access.get_account_by_did(target.guild.id, target.id)
+        account = get_account_by_did(target.guild.id, target.id)
 
         if account is None:
             return 2
@@ -145,20 +139,46 @@ class Account(commands.Cog):
 
         account.Balance -= int(amount)
 
-        account_access.update_account(account)
+        update_account(account)
 
         return 0
 
     def deposit(self, target, amount):
-        account = account_access.get_account_by_did(target.guild.id, target.id)
+        account = get_account_by_did(target.guild.id, target.id)
 
         if account is None:
-            account_access.add_account(target)
-            account = account_access.get_account_by_did(target.guild.id, target.id)
+            add_account(target)
+            account = get_account_by_did(target.guild.id, target.id)
             amount -= 1
 
         account.Balance += int(amount)
 
-        account_access.update_account(account)
+        update_account(account)
 
         return 0
+
+
+def init_tables():
+    db = AccountConnection()
+    db.create_tables()
+    db.close()
+
+
+def add_account(author):
+    db = AccountConnection()
+    db.add_account(author)
+    db.close()
+
+
+def get_account_by_did(gid, did):
+    db = AccountConnection()
+    account = db.get_account_by_did(gid, did)
+    db.close()
+
+    return account
+
+
+def update_account(account):
+    db = AccountConnection()
+    db.update_account(account)
+    db.close()

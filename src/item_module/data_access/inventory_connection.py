@@ -15,18 +15,16 @@ class InventoryConnection(base_connection.BaseConnection):
 
         sql = "CREATE TABLE %s (" \
               + "%s INT NOT NULL AUTO_INCREMENT, " \
-              + "%s INT NOT NULL, "\
               + "%s BIGINT(20) NOT NULL, " \
               + "%s BIGINT(20) NOT NULL, " \
               + "PRIMARY KEY (%s));"
-        values = (self._Inventories,
-                  self._ID,
-                  self._InventoryID,
-                  self._GuildID,
-                  self._DiscordID,
-                  self._ID)
+        formatted = sql.format(self._Inventories,
+                               self._InventoryID,
+                               self._GuildID,
+                               self._DiscordID,
+                               self._InventoryID)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -38,9 +36,11 @@ class InventoryConnection(base_connection.BaseConnection):
         iid = self.get_guild_inventories(gid)[-1].InventoryID
 
         sql = "INSERT INTO %s (%s, %s, %s) VALUES (%s, %s, %s);"
-        values = (self._Inventories, self._InventoryID, self._GuildID, self._DiscordID, str(iid + 1), str(gid), str(did))
+        formatted = sql.format(self._Inventories,
+                               self._InventoryID, self._GuildID, self._DiscordID,
+                               str(iid + 1), str(gid), str(did))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -50,9 +50,9 @@ class InventoryConnection(base_connection.BaseConnection):
         cursor = self._db.cursor()
 
         sql = "SELECT * FROM %s WHERE %s = %s AND %s = %s;"
-        values = (self._Inventories, self._GuildID, self._DiscordID, str(gid), str(did))
+        formatted = sql.format(self._Inventories, self._GuildID, self._DiscordID, str(gid), str(did))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         inv = cursor.fetchone()
 
@@ -64,9 +64,9 @@ class InventoryConnection(base_connection.BaseConnection):
         cursor = self._db.cursor()
 
         sql = "SELECT * FROM %s WHERE %s = %s;"
-        values = (self._Inventories, self._GuildID, str(gid))
+        formatted = sql.format(self._Inventories, self._GuildID, str(gid))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         fetched = cursor.fetchall()
 
@@ -83,13 +83,13 @@ class InventoryConnection(base_connection.BaseConnection):
         cursor = self._db.cursor()
 
         sql = "DELETE FROM %s WHERE %s = %s AND %s = %s;"
-        values = (self._Inventories, self._GuildID, str(gid), self._DiscordID, str(did))
+        formatted = sql.format(self._Inventories, self._GuildID, str(gid), self._DiscordID, str(did))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
         cursor.close()
 
     def _create_inventory(self, inv):
-        raise NotImplementedError
+        return Inventory(inv[0], inv[1], inv[2])

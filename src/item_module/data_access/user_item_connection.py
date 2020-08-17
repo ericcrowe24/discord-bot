@@ -1,7 +1,7 @@
 from typing import List
 
 from rgue_bot.bot.data_access.base_connection import BaseConnection
-from item_module.item.user_item import UserItem
+from item_module.user_item.user_item import UserItem
 
 
 class UserItemConnection(BaseConnection):
@@ -16,20 +16,20 @@ class UserItemConnection(BaseConnection):
 
         cursor = self._db.cursor()
 
-        sql = "CREATE TABLE %s (" \
-              "%s INT NOT NULL AUTO INCREMENT, " \
-              "%s INT NOT NULL, " \
-              "%s INT NOT NULL, " \
-              "%s INT NOT NULL, " \
-              "PRIMARY KEY(%s));"
-        values = (self._UserItems,
-                  self._ID,
-                  self._ItemID,
-                  self._InventoryID,
-                  self._Amount,
-                  self._ID)
+        sql = "CREATE TABLE {} (" \
+              "{} INT NOT NULL AUTO INCREMENT, " \
+              "{} INT NOT NULL, " \
+              "{} INT NOT NULL, " \
+              "{} INT NOT NULL, " \
+              "PRIMARY KEY({}));"
+        formatted = sql.format(self._UserItems,
+                               self._ID,
+                               self._ItemID,
+                               self._InventoryID,
+                               self._Amount,
+                               self._ID)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -38,12 +38,12 @@ class UserItemConnection(BaseConnection):
     def add_user_item(self, item: UserItem):
         cursor = self._db.cursor()
 
-        sql = "INSERT INTO %s (%s, %s, %s) VALUES (%s, %s, %s);"
-        values = (self._UserItems,
-                  self._ItemID, self._ItemID, self._Amount,
-                  item.InventoryID, item.ItemID, item.Amount)
+        sql = "INSERT INTO {} ({}, {}, {}) VALUES ({}, {}, {});"
+        formatted = sql.format(self._UserItems,
+                               self._ItemID, self._ItemID, self._Amount,
+                               item.InventoryID, item.ItemID, item.Amount)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -52,10 +52,10 @@ class UserItemConnection(BaseConnection):
     def get_user_items(self, iid: int) -> List[UserItem]:
         cursor = self._db.cursor()
 
-        sql = "SELECT * FROM %s WHERE %s = %s;"
-        values = (self._UserItems, self._InventoryID, str(iid))
+        sql = "SELECT * FROM {} WHERE {} = {};"
+        formatted = sql.format(self._UserItems, self._InventoryID, str(iid))
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         fetched = cursor.fetchall()
 
@@ -68,17 +68,31 @@ class UserItemConnection(BaseConnection):
 
         return items
 
+    def get_user_item(self, inv: int, item: int):
+        cursor = self._db.cursor()
+
+        sql = "SELECT * FROM {} WHERE {} = {} AND {} = {};"
+        formatted = sql.format(self._UserItems, str(inv), str(item))
+
+        cursor.execute(formatted)
+
+        fetched = cursor.fetchone()
+
+        cursor.close()
+
+        return self._create_user_item(fetched)
+
     def update_user_item(self, item: UserItem):
         cursor = self._db.cursor()
 
-        sql = "UPDATE %s SET %s = %s " \
-              "WHERE %s = %s " \
-              "AND %s = %s;"
-        values = (self._UserItems, self._Amount, item.Amount,
-                  self._InventoryID, item.InventoryID,
-                  self._ItemID, item.ItemID)
+        sql = "UPDATE {} SET {} = {} " \
+              "WHERE {} = {} " \
+              "AND {} = {};"
+        formatted = sql.format(self._UserItems, self._Amount, item.Amount,
+                               self._InventoryID, item.InventoryID,
+                               self._ItemID, item.ItemID)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 
@@ -87,14 +101,14 @@ class UserItemConnection(BaseConnection):
     def remove_user_item(self, item: UserItem):
         cursor = self._db.cursor()
 
-        sql = "DELETE FROM %s " \
-              "WHERE %s = %s " \
-              "AND %s = %s;"
-        values = (self._UserItems,
-                  self._InventoryID, item.InventoryID,
-                  self._ItemID, item.ItemID)
+        sql = "DELETE FROM {} " \
+              "WHERE {} = {} " \
+              "AND {} = {};"
+        formatted = sql.format(self._UserItems,
+                               self._InventoryID, item.InventoryID,
+                               self._ItemID, item.ItemID)
 
-        cursor.execute(sql, values)
+        cursor.execute(formatted)
 
         self._db.commit()
 

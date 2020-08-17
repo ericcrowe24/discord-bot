@@ -1,13 +1,12 @@
 from discord import Embed
 from discord import Color
 from discord.ext import commands
-from rgue_bot.bot.data_access.shame_connection import ShameConnection
 from rgue_bot.bot import utilities
-from rgue_bot.bot.cogs.shame import shame_log_access, shame_counter_access
+from rgue_bot.bot.cogs.shame.counter import Counter
+from rgue_bot.bot.data_access.shame_connection import ShameConnection
 import datetime
 
 
-# noinspection PyMethodMayBeStatic
 class Shame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -22,7 +21,7 @@ class Shame(commands.Cog):
 
     @shame.command(name="log", help="Show all of the same logs.")
     async def get_shame_logs(self, ctx):
-        logs = shame_log_access.get_all_shame_logs(ctx.guild.id)
+        logs = get_all_shame_logs(ctx.guild.id)
 
         embed = Embed(title="shame Log", color=Color.light_grey())
 
@@ -34,7 +33,7 @@ class Shame(commands.Cog):
 
     @shame.command(aliases=["score"], help="Show all users' shame counters.")
     async def scoreboard(self, ctx):
-        counters = shame_counter_access.get_all_counters(ctx.guild.id)
+        counters = get_all_counters(ctx.guild.id)
 
         desc = ""
 
@@ -61,21 +60,21 @@ class Shame(commands.Cog):
             return self._shame_role(ctx, target[3:-1], reason)
 
     def _shame_user(self, ctx, target, did, reason):
-        counter = shame_counter_access.get_counter(ctx.guild.id, did)
+        counter = get_counter(ctx.guild.id, did)
         member = utilities.find_member_by_id(ctx.guild.members, did)
 
         if counter is None:
-            shame_counter_access.add_counter(member)
-            counter = shame_counter_access.get_counter(ctx.guild.id, member.id)
+            add_counter(member)
+            counter = get_counter(ctx.guild.id, member.id)
 
         counter.Count += 1
 
         embed = self._create_shame_embed(member.name, counter, target, reason)
 
-        shame_counter_access.update_counter(counter)
+        update_counter(counter)
 
-        shame_log_access.add_shame_log(member,
-                                     ("N/A" if len(reason) == 0 else reason), datetime.datetime.now())
+        add_shame_log(member,
+                      ("N/A" if len(reason) == 0 else reason), datetime.datetime.now())
 
         return embed
 
@@ -85,20 +84,20 @@ class Shame(commands.Cog):
         desc = "Reason: " + ("No reason given." if len(reason) == 0 else reason) + "\n\n"
 
         for member in members:
-            counter = shame_counter_access.get_counter(ctx.guild.id, member.id)
+            counter = get_counter(ctx.guild.id, member.id)
 
             if counter is None:
-                shame_counter_access.add_counter(member)
-                counter = shame_counter_access.get_counter(ctx.guild.id, member.id)
+                add_counter(member)
+                counter = get_counter(ctx.guild.id, member.id)
 
             counter.Count += 1
 
             desc += ("<@!" + str(counter.DiscordID)
                      + ">\nCount: " + str(counter.Count)
                      + "\nLast shame: " + str(counter.Date) + "\n\n")
-            shame_counter_access.update_counter(counter)
-            shame_log_access.add_shame_log(member, ("N/A" if len(reason) == 0 else reason),
-                                         datetime.datetime.now())
+            update_counter(counter)
+            add_shame_log(member, ("N/A" if len(reason) == 0 else reason),
+                          datetime.datetime.now())
 
         return Embed(title="Users shamed", description=desc, color=Color.green())
 
@@ -120,3 +119,49 @@ class Shame(commands.Cog):
                                  + str(counter.Count)
                                  + "\nReason: " + ("No reason given." if len(reason) == 0 else reason),
                      color=Color.red())
+
+
+def get_counter(gid, did):
+    db = ShameConnection()
+    counter = db.get_counter_by_discord_id(gid, did)
+    db.close()
+
+    return counter
+
+
+def get_all_counters(gid):
+    db = ShameConnection()
+    counters = db.get_all_counters(gid)
+    db.close()
+
+    return counters
+
+
+def update_counter(counter):
+    counter.Date = datetime.datetime.now()
+
+    db = ShameConnection()
+    db.update_counter(counter)
+    db.close()
+
+
+def add_counter(member):
+    counter = Counter(member.guild.id, member.id, datetime.datetime.now(), 1)
+
+    db = ShameConnection()
+    db.add_counter(counter)
+    db.close()
+
+    return counter
+
+
+def get_all_shame_logs(gid):
+    db = ShameConnection()
+    logs = db.get_shame_logs(gid)
+    return logs
+
+
+def add_shame_log(user, reason, date):
+    db = ShameConnection()
+    db.add_shame_log(user, reason, date)
+    db.close()
