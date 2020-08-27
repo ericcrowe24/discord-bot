@@ -1,9 +1,9 @@
 from discord import Embed
 from discord import Color
 from discord.ext import commands
-from rgue_bot.bot import utilities
-from rgue_bot.bot.cogs.shame.counter import Counter
-from rgue_bot.bot.data_access.shame_connection import ShameConnection
+from ark_bot.bot import utilities
+from ark_bot.bot.cogs.shame.counter import Counter
+from ark_bot.bot.data_access.shame_connection import ShameConnection
 import datetime
 
 

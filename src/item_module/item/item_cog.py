@@ -34,15 +34,15 @@ class ItemCog(commands.Cog):
 
         item = Item(0, 0, ctx.guild.id, args[0], args[1], rarity)
 
-        add_item(item)
+        self.add_item(item)
 
         await ctx.send("Item added!")
 
     @item.command()
     async def remove(self, ctx, *, iid):
-        item = get_item_by_id(ctx.guild.id, int(iid))
+        item = self.get_item_by_id(ctx.guild.id, int(iid))
 
-        delete_item(item)
+        self.delete_item(item)
 
         await ctx.send("Item deleted.")
 
@@ -52,9 +52,9 @@ class ItemCog(commands.Cog):
             return
 
         if rarity is None:
-            items = get_all_guild_items(ctx.guild.id)
+            items = self.get_all_guild_items(ctx.guild.id)
         else:
-            items = get_items_by_rarity(ctx.guild.id, self._get_rarity(rarity))
+            items = self.get_items_by_rarity(ctx.guild.id, self._get_rarity(rarity))
 
         desc = ""
 
@@ -73,59 +73,49 @@ class ItemCog(commands.Cog):
         return rarities[rarity.lower()]
 
     def _create_tables(self):
-        create_tables()
+        db = ItemConnection()
+        db.create_tables()
+        db.close()
 
+    def add_item(self, item: Item) -> bool:
+        db = ItemConnection()
+        success = db.add_item(item)
+        db.close()
 
-def create_tables():
-    db = ItemConnection()
-    db.create_tables()
-    db.close()
+        if success:
+            return True
+        else:
+            return False
 
+    def get_item_by_id(self, gid: int, iid: int) -> Item:
+        db = ItemConnection()
+        item = db.get_item_by_id(gid, iid)
+        db.close()
 
-def add_item(item: Item) -> bool:
-    db = ItemConnection()
-    success = db.add_item(item)
-    db.close()
+        return item
 
-    if success:
-        return True
-    else:
-        return False
+    def get_items_by_rarity(self, gid: int, rarity: Rarity) -> List[Item]:
+        db = ItemConnection()
+        items = db.get_items_by_rarity(gid, rarity)
+        db.close()
 
+        return items
 
-def get_item_by_id(gid: int, iid: int) -> Item:
-    db = ItemConnection()
-    item = db.get_item_by_id(gid, iid)
-    db.close()
+    def get_all_guild_items(self, gid: int) -> List[Item]:
+        db = ItemConnection()
+        items = db.get_all_guild_items(gid)
+        db.close()
 
-    return item
+        return items
 
+    def update_item(self, item: Item):
+        db = ItemConnection()
+        db.update_item(item)
+        db.close()
 
-def get_items_by_rarity(gid: int, rarity: Rarity) -> List[Item]:
-    db = ItemConnection()
-    items = db.get_items_by_rarity(gid, rarity)
-    db.close()
-
-    return items
-
-
-def get_all_guild_items(gid: int) -> List[Item]:
-    db = ItemConnection()
-    items = db.get_all_guild_items(gid)
-    db.close()
-
-    return items
-
-
-def update_item(item: Item):
-    db = ItemConnection()
-    db.update_item(item)
-    db.close()
-
-
-def delete_item(item: Item):
-    db = ItemConnection()
-    db.delete_item(item)
-    db.close()
+    def delete_item(self, item: Item):
+        db = ItemConnection()
+        db.delete_item(item)
+        db.close()
 
 

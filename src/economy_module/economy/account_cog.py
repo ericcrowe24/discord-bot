@@ -1,6 +1,6 @@
 from discord.ext import commands
 from discord.ext.commands import Context
-from rgue_bot.bot import utilities
+from ark_bot.bot import utilities
 from economy_module.data_access.account_connection import AccountConnection
 
 

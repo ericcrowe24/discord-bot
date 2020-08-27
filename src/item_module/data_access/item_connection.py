@@ -1,5 +1,5 @@
 from typing import List
-from rgue_bot.bot.data_access import base_connection
+from ark_bot.bot.data_access import base_connection
 from item_module.item.item import Item, Rarity
 
 

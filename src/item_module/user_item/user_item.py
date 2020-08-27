@@ -1,6 +1,7 @@
 class UserItem:
-    def __init__(self, id: int, invid: int, iid: int, amt: int,):
-        self.ID = id
+    def __init__(self, iid: int, inv_item_id: int, invid: int, item_id: int, amt: int, ):
+        self.ID = iid
+        self.InventoryItemID = inv_item_id
         self.InventoryID = invid
-        self.ItemID = iid
+        self.ItemID = item_id
         self.Amount = amt

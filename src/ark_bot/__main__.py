@@ -1,4 +1,4 @@
-from rgue_bot import start
+from ark_bot import start
 import sys
 
 if __name__ == "__main__":

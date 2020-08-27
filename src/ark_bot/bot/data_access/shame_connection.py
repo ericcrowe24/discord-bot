@@ -1,5 +1,5 @@
-from rgue_bot.bot.data_access import base_connection
-from rgue_bot.bot.cogs.shame.counter import Counter
+from ark_bot.bot.data_access import base_connection
+from ark_bot.bot.cogs.shame.counter import Counter
 
 
 class ShameConnection(base_connection.BaseConnection):
